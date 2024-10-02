@@ -117,8 +117,8 @@ test {
 
 
 gradlePlugin {
-  website = 'https://github.com/jgremmen'
-  vcsUrl = 'https://github.com/jgremmen'
+  website = 'https://github.com/jgremmen/repackage'
+  vcsUrl = 'https://github.com/jgremmen/repackage'
 
   plugins {
     create('repackage') {
