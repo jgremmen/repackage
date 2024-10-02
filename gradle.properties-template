@@ -1,0 +1,18 @@
+# Trust Store
+systemProp.javax.net.ssl.trustStore=../cacerts
+
+# Signing Key Ring
+signing.keyId=D65F2E81
+signing.password=...
+signing.secretKeyRingFile=/Users/jeroen/projects/0F69E7AAD65F2E81-keys.asc
+
+# Gradle Plugin
+gradle.publish.key=...
+gradle.publish.secret=...
+
+# JFrog Artifactory
+artifactory.username=...
+artifactory.password=...
+
+# Workaround for Nexus
+systemProp.org.gradle.internal.publish.checksums.insecure=true
