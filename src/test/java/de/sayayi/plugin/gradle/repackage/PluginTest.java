@@ -24,11 +24,10 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.write;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 
 
 /**
@@ -47,12 +46,12 @@ class PluginTest
   void prepareProject() throws IOException
   {
     write(testProjectDir.resolve("settings.gradle"),
-        singletonList("rootProject.name = 'test-repackage'"));
+        List.of("rootProject.name = 'test-repackage'"));
 
     write(testProjectDir.resolve("gradle.properties"),
-        singletonList(""));
+        List.of(""));
 
-    write(testProjectDir.resolve("build.gradle"), asList(
+    write(testProjectDir.resolve("build.gradle"), List.of(
         "plugins {",
         "  id 'java'",
         "  id 'de.sayayi.plugin.gradle.repackage'",

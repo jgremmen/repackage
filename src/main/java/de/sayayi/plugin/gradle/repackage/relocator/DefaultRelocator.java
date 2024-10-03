@@ -26,7 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Collections.singletonList;
 import static org.codehaus.plexus.util.SelectorUtils.REGEX_HANDLER_PREFIX;
 
 
@@ -68,14 +67,14 @@ public class DefaultRelocator implements Relocator
 
   public @NotNull DefaultRelocator include(@NotNull String pattern)
   {
-    includes.addAll(normalizePatterns(singletonList(pattern)));
+    includes.addAll(normalizePatterns(List.of(pattern)));
     return this;
   }
 
 
   public @NotNull DefaultRelocator exclude(@NotNull String pattern)
   {
-    excludes.addAll(normalizePatterns(singletonList(pattern)));
+    excludes.addAll(normalizePatterns(List.of(pattern)));
     return this;
   }
 

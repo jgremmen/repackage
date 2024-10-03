@@ -19,13 +19,11 @@ import lombok.val;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import static java.lang.Character.isJavaIdentifierPart;
 import static java.lang.Character.isJavaIdentifierStart;
-import static java.util.Arrays.asList;
 
 
 /**
@@ -33,18 +31,12 @@ import static java.util.Arrays.asList;
  */
 public class ClassUtil
 {
-  private static final Set<String> KEYWORDS = new HashSet<>();
-
-
-  static
-  {
-    KEYWORDS.addAll(asList(
-        "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue",
-        "default", "do", "double", "else", "enum", "extends", "false", "final", "finally", "float", "for", "if",
-        "goto", "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "null",
-        "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch",
-        "synchronized", "this", "throw", "throws", "transient", "true", "try", "void", "volatile", "while"));
-  }
+  private static final Set<String> KEYWORDS = Set.of(
+      "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue",
+      "default", "do", "double", "else", "enum", "extends", "false", "final", "finally", "float", "for", "if",
+      "goto", "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "null",
+      "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch",
+      "synchronized", "this", "throw", "throws", "transient", "true", "try", "void", "volatile", "while");
 
 
   @Contract(pure = true)
