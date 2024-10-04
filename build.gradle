@@ -150,12 +150,25 @@ publishing {
       url = snapshot
           ? "https://artifactory.sayayi.de/artifactory/plugins-snapshot/"
           : "https://artifactory.sayayi.de/artifactory/plugins-release/"
+
       credentials {
-        username property('artifactory.username')
-        password property('artifactory.password')
+        username = findProperty('artifactory.username')
+        password = findProperty('artifactory.password')
       }
       authentication {
         digest(DigestAuthentication)
+      }
+    }
+
+    maven {
+      name = 'mavenCentral'
+      url = snapshot
+          ? 'https://oss.sonatype.org/content/repositories/snapshots'
+          : 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+
+      credentials {
+        username = findProperty('mavenCentral.username')
+        password = findProperty('mavenCentral.password')
       }
     }
   }
@@ -184,6 +197,12 @@ publishing {
             email = 'jeroen.gremmen@sayayi.de'
           }
         }
+
+        scm {
+          connection = 'scm:git:git://github.com/jgremmen/repackage.git'
+          developerConnection = 'scm:git:git://github.com/jgremmen/repackage.git'
+          url = 'https://github.com/jgremmen/repackage'
+        }
       }
     }
   }
@@ -196,7 +215,9 @@ signing {
 
 
 publishGradlePluginPublicationToJfrogArtifactoryRepository.dependsOn 'signPluginMavenPublication'
+publishGradlePluginPublicationToMavenTempRepository.dependsOn 'signPluginMavenPublication'
 
 afterEvaluate {
   publishPluginMavenPublicationToJfrogArtifactoryRepository.dependsOn 'signGradlePluginPublication'
+  publishPluginMavenPublicationToMavenTempRepository.dependsOn 'signGradlePluginPublication'
 }
