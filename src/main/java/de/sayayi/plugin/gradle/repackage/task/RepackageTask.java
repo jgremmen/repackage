@@ -194,7 +194,8 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
 
   @Override
-  public @NotNull RepackageSpec relocate(@NotNull String pattern, String destination, Action<DefaultRelocator> configure)
+  public @NotNull RepackageSpec relocate(@NotNull String pattern, String destination,
+                                         Action<DefaultRelocator> configure)
   {
     addRelocator(new DefaultRelocator(pattern, destination), configure);
     return this;

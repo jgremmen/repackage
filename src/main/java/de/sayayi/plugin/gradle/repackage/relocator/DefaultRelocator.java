@@ -29,6 +29,7 @@ import java.util.Set;
 import static org.codehaus.plexus.util.SelectorUtils.REGEX_HANDLER_PREFIX;
 
 
+@SuppressWarnings("unused")
 public class DefaultRelocator implements Relocator
 {
   private final String pattern;

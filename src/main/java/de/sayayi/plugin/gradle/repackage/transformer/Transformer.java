@@ -41,7 +41,6 @@ public interface Transformer extends Named
   void modifyOutputStream(@NotNull ZipOutputStream zipOutputStream) throws IOException;
 
 
-
   @Internal
   @Contract(pure = true)
   default @NotNull String getName() {
