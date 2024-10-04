@@ -215,9 +215,11 @@ signing {
 
 
 publishGradlePluginPublicationToJfrogArtifactoryRepository.dependsOn 'signPluginMavenPublication'
+publishGradlePluginPublicationToMavenCentralRepository.dependsOn 'signPluginMavenPublication'
 publishGradlePluginPublicationToMavenTempRepository.dependsOn 'signPluginMavenPublication'
 
 afterEvaluate {
   publishPluginMavenPublicationToJfrogArtifactoryRepository.dependsOn 'signGradlePluginPublication'
+  publishPluginMavenPublicationToMavenCentralRepository.dependsOn 'signGradlePluginPublication'
   publishPluginMavenPublicationToMavenTempRepository.dependsOn 'signGradlePluginPublication'
 }
