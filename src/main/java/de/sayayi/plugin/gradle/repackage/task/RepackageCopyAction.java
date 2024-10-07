@@ -23,7 +23,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.stream.Streams;
+import org.apache.tools.ant.util.StreamUtils;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipFile;
 import org.apache.tools.zip.ZipOutputStream;
@@ -213,8 +213,8 @@ class RepackageCopyAction implements CopyAction
       try(val archive = new ZipFile(fileDetails.getFile())) {
         val patternSpec = patternSet.getAsSpec();
 
-        Streams
-            .of(archive.getEntries())
+        StreamUtils
+            .enumerationAsStream(archive.getEntries())
             .map(zipEntry -> new ArchiveFileTreeElement(new RelativeArchivePath(zipEntry)))
             .filter(archiveElement ->
                 patternSpec.isSatisfiedBy(archiveElement.asFileTreeElement()) &&

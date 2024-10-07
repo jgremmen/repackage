@@ -51,14 +51,18 @@ dependencies {
 
   api gradleApi()
 
-  implementation "org.ow2.asm:asm:${asmVersion}"
-  implementation "org.ow2.asm:asm-commons:${asmVersion}"
+  implementation("org.ow2.asm:asm-commons:${asmVersion}") {
+    exclude module: 'asm-tree'
+  }
 
   implementation('org.apache.ant:ant:1.10.14') {
     transitive = false
   }
 
-  implementation 'org.apache.commons:commons-compress:1.27.0'
+  implementation('org.apache.commons:commons-compress:1.27.0') {
+    exclude module: 'commons-codec'
+    exclude module: 'commons-lang3'
+  }
 
   implementation 'org.codehaus.plexus:plexus-utils:4.0.2'
 
@@ -175,31 +179,32 @@ publishing {
     gradlePlugin(MavenPublication) {
       from components.java
 
-      pom {
-        name = 'Repackage Gradle Plugin'
-        description = 'Repackage classes and java libraries.'
-        inceptionYear = '2024'
+      pom { MavenPom pom ->
+        pom.name = 'Repackage Gradle Plugin'
+        pom.description = 'Repackage classes and java libraries.'
+        pom.url = 'https://github.com/jgremmen/repackage'
+        pom.inceptionYear = '2024'
 
         licenses {
-          license {
-            name = 'Apache License, Version 2.0'
-            url = 'https://www.apache.org/licenses/LICENSE-2.0'
-            distribution = 'repo'
+          license { MavenPomLicense lic ->
+            lic.name = 'Apache License, Version 2.0'
+            lic.url = 'https://www.apache.org/licenses/LICENSE-2.0'
+            lic.distribution = 'repo'
           }
         }
 
         developers {
-          developer {
-            id = 'jgremmen'
-            name = 'Jeroen Gremmen'
-            email = 'jeroen.gremmen@sayayi.de'
+          developer { MavenPomDeveloper dev ->
+            dev.id = 'jgremmen'
+            dev.name = 'Jeroen Gremmen'
+            dev.email = 'jeroen.gremmen@sayayi.de'
           }
         }
 
-        scm {
-          connection = 'scm:git:git://github.com/jgremmen/repackage.git'
-          developerConnection = 'scm:git:git://github.com/jgremmen/repackage.git'
-          url = 'https://github.com/jgremmen/repackage'
+        scm { MavenPomScm scm ->
+          scm.connection = 'scm:git:git://github.com/jgremmen/repackage.git'
+          scm.developerConnection = 'scm:git:git://github.com/jgremmen/repackage.git'
+          scm.url = 'https://github.com/jgremmen/repackage'
         }
       }
     }
