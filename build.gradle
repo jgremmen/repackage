@@ -27,7 +27,7 @@ layout.buildDirectory = '.build'
 
 description = 'Repackage Gradle Plugin'
 group = 'de.sayayi.plugin.gradle'
-version = '0.3-SNAPSHOT'
+version = '0.2.1'
 
 
 java {
@@ -218,12 +218,19 @@ signing {
 
 
 publishGradlePluginPublicationToMavenTempRepository.configure {
+  dependsOn 'test'
   dependsOn 'signPluginMavenPublication'
 }
 
 
 publishGradlePluginPublicationToMavenCentralRepository.configure {
+  dependsOn 'test'
   dependsOn 'signPluginMavenPublication'
+}
+
+
+publishPlugins.configure {
+  dependsOn 'test'
 }
 
 
@@ -232,7 +239,6 @@ tasks.register('releaseAll') {
   description = 'Release all publications to Maven and Gradle Plugin repository.'
 
   dependsOn 'publishGradlePluginPublicationToMavenCentralRepository'
-  dependsOn 'publishRepackagePluginMarkerMavenPublicationToMavenCentralRepository'
   dependsOn 'publishPlugins'
 }
 
