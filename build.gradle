@@ -27,7 +27,7 @@ layout.buildDirectory = '.build'
 
 description = 'Repackage Gradle Plugin'
 group = 'de.sayayi.plugin.gradle'
-version = '0.2'
+version = '0.3-SNAPSHOT'
 
 
 java {
