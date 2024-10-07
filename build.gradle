@@ -15,7 +15,7 @@
  */
 
 plugins {
-  id 'java-library'
+  id 'java-gradle-plugin'
   id 'com.gradle.plugin-publish' version '1.2.1'
   id 'maven-publish'
   id 'signing'
@@ -76,11 +76,6 @@ configurations {
 }
 
 
-jar {
-  archiveBaseName = 'repackage-gradle-plugin'
-}
-
-
 tasks.withType(JavaCompile).configureEach {
   javaCompiler = javaToolchains.compilerFor {
     languageVersion = JavaLanguageVersion.of(11)
@@ -121,12 +116,12 @@ gradlePlugin {
   vcsUrl = 'https://github.com/jgremmen/repackage'
 
   plugins {
-    create('repackage') {
-      id = 'de.sayayi.plugin.gradle.repackage'
-      displayName = 'Repackage Gradle Plugin'
-      description = 'Repackage classes and java libraries.'
-      implementationClass = 'de.sayayi.plugin.gradle.repackage.RepackagePlugin'
-      tags.set(['sayayi', 'repackage'])
+    repackage { PluginDeclaration pd ->
+      pd.id = 'de.sayayi.plugin.gradle.repackage'
+      pd.displayName = 'Repackage Gradle Plugin'
+      pd.description = 'Repackage classes and java libraries.'
+      pd.implementationClass = 'de.sayayi.plugin.gradle.repackage.RepackagePlugin'
+      pd.tags.set(['sayayi', 'repackage'])
     }
   }
 }
@@ -214,12 +209,30 @@ signing {
 }
 
 
-publishGradlePluginPublicationToJfrogArtifactoryRepository.dependsOn 'signPluginMavenPublication'
-publishGradlePluginPublicationToMavenCentralRepository.dependsOn 'signPluginMavenPublication'
-publishGradlePluginPublicationToMavenTempRepository.dependsOn 'signPluginMavenPublication'
+publishGradlePluginPublicationToMavenTempRepository.configure {
+  dependsOn 'signPluginMavenPublication'
+}
 
-afterEvaluate {
-  publishPluginMavenPublicationToJfrogArtifactoryRepository.dependsOn 'signGradlePluginPublication'
-  publishPluginMavenPublicationToMavenCentralRepository.dependsOn 'signGradlePluginPublication'
-  publishPluginMavenPublicationToMavenTempRepository.dependsOn 'signGradlePluginPublication'
+
+publishGradlePluginPublicationToMavenCentralRepository.configure {
+  dependsOn 'signPluginMavenPublication'
+}
+
+
+tasks.register('releaseAll') {
+  group = 'release'
+  description = 'Release all publications to Maven and Gradle Plugin repository.'
+
+  dependsOn 'publishGradlePluginPublicationToMavenCentralRepository'
+  dependsOn 'publishRepackagePluginMarkerMavenPublicationToMavenCentralRepository'
+  dependsOn 'publishPlugins'
+}
+
+
+tasks.register('releaseAllTemp') {
+  group = 'release'
+  description = 'Release all publications to temporary Maven repository.'
+
+  dependsOn 'publishGradlePluginPublicationToMavenTempRepository'
+  dependsOn 'publishRepackagePluginMarkerMavenPublicationToMavenTempRepository'
 }
