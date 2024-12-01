@@ -35,6 +35,7 @@ import org.gradle.api.internal.ConventionTask;
 import org.gradle.api.internal.DocumentationRegistry;
 import org.gradle.api.internal.file.copy.CopyActionExecuter;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
 import org.gradle.api.tasks.bundling.ZipEntryCompression;
@@ -73,7 +74,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
   public RepackageTask()
   {
     val project = getProject();
-    val repackageExtension = requireNonNull(project.getExtensions().findByType(RepackageExtension.class));
+    val repackageExtension = project.getExtensions().getByType(RepackageExtension.class);
 
     sourceFiles = project.files();
     destinationDirectory = repackageExtension.getDestinationDir();
@@ -83,6 +84,12 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
     getVerbose().convention(repackageExtension.getVerbose());
     getEntryCompression().convention(DEFLATED);
+  }
+
+
+  @Inject
+  protected ObjectFactory getObjectFactory() {
+    throw new UnsupportedOperationException();
   }
 
 
@@ -174,7 +181,6 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
    *
    * @param dependencyNotation The dependency, in a notation described in {@link DependencyHandler}.
    * @param configureClosure The closure to use to configure the dependency.
-   * @see DependencyHandler
    */
   @Override
   public void from(@NotNull String dependencyNotation, @NotNull Closure<?> configureClosure) {
@@ -272,7 +278,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
     configure.execute(filterResourceTransformer.getFilter());
     return this;
   }
-
+  
 
   @Override
   public @NotNull RepackageSpec exclude(@NotNull String classnamePattern)
@@ -297,7 +303,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
     if (getVerbose().get())
       getLogger().info("Repackage to: {}", repackagedJarFile);
 
-    val objectFactory = getProject().getObjects();
+    val objectFactory = getObjectFactory();
     val rootSpec = objectFactory.newInstance(DefaultCopySpec.class);
 
     rootSpec.setCaseSensitive(true);

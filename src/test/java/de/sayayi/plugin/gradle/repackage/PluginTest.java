@@ -101,7 +101,7 @@ class PluginTest
   {
     val result = GradleRunner.create()
         .withProjectDir(testProjectDir.toFile())
-        .withArguments("assemble", "--stacktrace", "--info")
+        .withArguments("assemble", "--stacktrace", "--info", "--configuration-cache")
         .withPluginClasspath()
         .withGradleVersion("8.9")
         .withDebug(true)
