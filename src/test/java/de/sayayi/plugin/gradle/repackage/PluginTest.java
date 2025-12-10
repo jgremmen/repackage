@@ -28,6 +28,9 @@ import java.util.List;
 
 import static java.nio.file.Files.createDirectories;
 import static java.nio.file.Files.write;
+import static org.gradle.testkit.runner.TaskOutcome.SUCCESS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -108,6 +111,36 @@ class PluginTest
         .forwardOutput()
         .build();
 
-    val tasks = result.getTasks();
+    //noinspection DataFlowIssue
+    assertEquals(SUCCESS, result.task(":assemble").getOutcome());
+  }
+
+
+  @Test
+  @DisplayName("Configuration cache support")
+  void testPluginWithConfigurationCache()
+  {
+    // 1st build -> create cache
+    val result1 = GradleRunner.create()
+        .withProjectDir(testProjectDir.toFile())
+        .withArguments("assemble", "--configuration-cache", "--stacktrace")
+        .withPluginClasspath()
+        .withGradleVersion("9.2.1")
+        .forwardOutput()
+        .build();
+
+    //noinspection DataFlowIssue
+    assertEquals(SUCCESS, result1.task(":assemble").getOutcome());
+
+    // 2nd build -> use cache
+    val result2 = GradleRunner.create()
+        .withProjectDir(testProjectDir.toFile())
+        .withArguments("assemble", "--configuration-cache", "--stacktrace")
+        .withPluginClasspath()
+        .withGradleVersion("9.2.1")
+        .forwardOutput()
+        .build();
+
+    assertTrue(result2.getOutput().contains("Reusing configuration cache"));
   }
 }
