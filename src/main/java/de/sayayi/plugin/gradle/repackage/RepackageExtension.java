@@ -18,8 +18,6 @@ package de.sayayi.plugin.gradle.repackage;
 import de.sayayi.plugin.gradle.repackage.task.RepackageSpec;
 import de.sayayi.plugin.gradle.repackage.task.RepackageTask;
 import groovy.lang.Closure;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
@@ -33,14 +31,18 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author Jeroen Gremmen
  */
-@RequiredArgsConstructor
 @SuppressWarnings("unused")
 public abstract class RepackageExtension
 {
   private final @NotNull Project project;
 
 
-  public abstract @NotNull Property<Boolean> getVerbose();
+  public RepackageExtension(@NotNull Project project) {
+    this.project = project;
+  }
+
+
+  public abstract @NotNull Property<@NotNull Boolean> getVerbose();
 
 
   /**
@@ -53,7 +55,7 @@ public abstract class RepackageExtension
 
   public @NotNull FileCollection dependency(@NotNull String name, @NotNull Closure<RepackageSpec> configureClosure)
   {
-    val repackageTask = project
+    final var repackageTask = project
         .getTasks()
         .register("repackage-" + name, RepackageTask.class, new ClosureBackedAction<>(configureClosure));
 

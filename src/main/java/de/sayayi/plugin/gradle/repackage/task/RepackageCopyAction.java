@@ -18,9 +18,6 @@ package de.sayayi.plugin.gradle.repackage.task;
 import de.sayayi.plugin.gradle.repackage.relocator.Relocator;
 import de.sayayi.plugin.gradle.repackage.transformer.Transformer;
 import de.sayayi.plugin.gradle.repackage.transformer.TransformerContext;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tools.ant.util.StreamUtils;
 import org.apache.tools.zip.ZipEntry;
@@ -47,6 +44,8 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.ClassRemapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +58,6 @@ import java.util.regex.Pattern;
 
 import static java.nio.file.Files.newInputStream;
 import static java.util.Arrays.copyOf;
-import static lombok.AccessLevel.PACKAGE;
 import static org.apache.commons.io.IOUtils.copyLarge;
 import static org.apache.tools.zip.UnixStat.DIR_FLAG;
 import static org.apache.tools.zip.UnixStat.FILE_FLAG;
@@ -72,10 +70,9 @@ import static org.objectweb.asm.ClassReader.EXPAND_FRAMES;
 /**
  * @author Jeroen Gremmen
  */
-@Slf4j
-@RequiredArgsConstructor(access = PACKAGE)
 class RepackageCopyAction implements CopyAction
 {
+  private static final Logger LOG = LoggerFactory.getLogger(RepackageCopyAction.class);
   private static final Pattern VERSIONS_PREFIX_PATTERN = Pattern.compile("^(META-INF/versions/\\d+/)(.*)");
 
   private final boolean verbose;
@@ -87,6 +84,18 @@ class RepackageCopyAction implements CopyAction
 
   private final Set<String> visitedDirectories = new HashSet<>();
   private final Set<String> visitedFiles = new HashSet<>();
+
+
+  RepackageCopyAction(boolean verbose, File jarFile, ZipEntryCompression zipEntryCompression,
+                      List<Transformer> transformers, @NotNull List<Relocator> relocators, PatternSet patternSet)
+  {
+    this.verbose = verbose;
+    this.jarFile = jarFile;
+    this.zipEntryCompression = zipEntryCompression;
+    this.transformers = transformers;
+    this.relocators = relocators;
+    this.patternSet = patternSet;
+  }
 
 
   @Override
@@ -177,7 +186,7 @@ class RepackageCopyAction implements CopyAction
     private void visitFile(@NotNull FileCopyDetails fileDetails)
     {
       if (verbose)
-        log.info("Source file: {}", fileDetails.getRelativePath());
+        LOG.info("Source file: {}", fileDetails.getRelativePath());
 
       if (!isArchive(fileDetails))
       {
@@ -206,7 +215,6 @@ class RepackageCopyAction implements CopyAction
     }
 
 
-    @SneakyThrows(IOException.class)
     private void processArchive(@NotNull FileCopyDetails fileDetails)
     {
       try(var archive = new ZipFile(fileDetails.getFile())) {
@@ -219,27 +227,32 @@ class RepackageCopyAction implements CopyAction
                 patternSpec.isSatisfiedBy(archiveElement.asFileTreeElement()) &&
                 archiveElement.getRelativePath().isFile())
             .forEach(archiveElement -> visitArchiveFile(archiveElement, archive));
+      } catch(IOException ex) {
+        throw new GradleException(String.format("Could not process archive '%s'.", fileDetails), ex);
       }
     }
 
 
-    @SneakyThrows(IOException.class)
     private void visitArchiveFile(@NotNull ArchiveFileTreeElement archiveFile, @NotNull ZipFile archive)
     {
-      if (archiveFile.isClassFile() || !isTransformable(archiveFile))
-      {
-        var archiveFilePath = archiveFile.getRelativePath();
-
-        if (visitedFiles.add(archiveFilePath.getPathString()))
+      try {
+        if (archiveFile.isClassFile() || !isTransformable(archiveFile))
         {
-          if (!remapper.hasRelocators() || !archiveFile.isClassFile())
-            copyArchiveEntry(archiveFilePath, archive);
-          else
-            remapClass(archiveFilePath, archive);
+          final var archiveFilePath = archiveFile.getRelativePath();
+
+          if (visitedFiles.add(archiveFilePath.getPathString()))
+          {
+            if (!remapper.hasRelocators() || !archiveFile.isClassFile())
+              copyArchiveEntry(archiveFilePath, archive);
+            else
+              remapClass(archiveFilePath, archive);
+          }
         }
+        else
+          transform(archiveFile, archive);
+      } catch(IOException ex) {
+        throw new GradleException(String.format("Could not process archive '%s'.", archiveFile), ex);
       }
-      else
-        transform(archiveFile, archive);
     }
 
 
@@ -414,10 +427,15 @@ class RepackageCopyAction implements CopyAction
 
 
 
-  @RequiredArgsConstructor
+  @SuppressWarnings("ClassCanBeRecord")
   public static class ArchiveFileTreeElement implements FileTreeElement
   {
     private final @NotNull RelativeArchivePath archivePath;
+
+
+    public ArchiveFileTreeElement(@NotNull RelativeArchivePath archivePath) {
+      this.archivePath = archivePath;
+    }
 
 
     @Contract(pure = true)

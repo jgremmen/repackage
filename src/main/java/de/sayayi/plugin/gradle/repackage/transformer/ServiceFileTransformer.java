@@ -16,10 +16,10 @@
 package de.sayayi.plugin.gradle.repackage.transformer;
 
 import groovy.lang.Closure;
-import lombok.SneakyThrows;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 import org.codehaus.groovy.runtime.IOGroovyMethods;
+import org.gradle.api.GradleException;
 import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.Input;
@@ -65,37 +65,40 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
 
 
   @Override
-  @SneakyThrows(IOException.class)
   public void transform(@NotNull TransformerContext context)
   {
-    var lines = readLines(context.getInputStream());
-    var targetPath = context.getPath();
-    String line, comment;
+    try {
+      final var lines = readLines(context.inputStream());
+      var targetPath = context.path();
+      String line, comment;
 
-    for(var relocator: context.getRelocators())
-    {
-      if (relocator.canRelocateClass(new File(targetPath).getName()))
-        targetPath = relocator.relocateClass(targetPath);
+      for(final var relocator: context.relocators())
+      {
+        if (relocator.canRelocateClass(new File(targetPath).getName()))
+          targetPath = relocator.relocateClass(targetPath);
 
-      for(int n = 0, l = lines.size(), hashIndex; n < l; n++)
-        if ((hashIndex = (line = lines.get(n)).indexOf('#')) != 0)
-        {
-          if (hashIndex > 0)
+        for(int n = 0, l = lines.size(), hashIndex; n < l; n++)
+          if ((hashIndex = (line = lines.get(n)).indexOf('#')) != 0)
           {
-            comment = "  # " + line.substring(hashIndex + 1).trim();
-            line = line.substring(0, hashIndex).trim();
+            if (hashIndex > 0)
+            {
+              comment = "  # " + line.substring(hashIndex + 1).trim();
+              line = line.substring(0, hashIndex).trim();
+            }
+            else
+              comment = "";
+
+            if (relocator.canRelocateClass(line))
+              lines.set(n, relocator.relocateClass(line) + comment);
           }
-          else
-            comment = "";
+      }
 
-          if (relocator.canRelocateClass(line))
-            lines.set(n, relocator.relocateClass(line) + comment);
-        }
+      serviceEntries
+          .computeIfAbsent(targetPath, p -> new ArrayList<>())
+          .addAll(lines);
+    } catch(IOException ex) {
+      throw new GradleException("Failed to read service file", ex);
     }
-
-    serviceEntries
-        .computeIfAbsent(targetPath, p -> new ArrayList<>())
-        .addAll(lines);
   }
 
 

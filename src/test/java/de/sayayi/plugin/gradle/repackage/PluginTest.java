@@ -15,7 +15,6 @@
  */
 package de.sayayi.plugin.gradle.repackage;
 
-import lombok.val;
 import org.gradle.testkit.runner.GradleRunner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -102,7 +101,7 @@ class PluginTest
   @DisplayName("Rename package")
   void testNoSources()
   {
-    val result = GradleRunner.create()
+    final var result = GradleRunner.create()
         .withProjectDir(testProjectDir.toFile())
         .withArguments("assemble", "--stacktrace", "--info")
         .withPluginClasspath()
@@ -121,7 +120,7 @@ class PluginTest
   void testPluginWithConfigurationCache()
   {
     // 1st build -> create cache
-    val result1 = GradleRunner.create()
+    final var result1 = GradleRunner.create()
         .withProjectDir(testProjectDir.toFile())
         .withArguments("assemble", "--configuration-cache", "--stacktrace")
         .withPluginClasspath()
@@ -133,7 +132,7 @@ class PluginTest
     assertEquals(SUCCESS, result1.task(":assemble").getOutcome());
 
     // 2nd build -> use cache
-    val result2 = GradleRunner.create()
+    final var result2 = GradleRunner.create()
         .withProjectDir(testProjectDir.toFile())
         .withArguments("assemble", "--configuration-cache", "--stacktrace")
         .withPluginClasspath()

@@ -42,13 +42,9 @@ repositories {
 
 def asmVersion = '[9.0,10.0)'
 def junitVersion = '5.12.+'
-def lombokVersion = '1.18.+'
 
 
 dependencies {
-  annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-  compileOnly "org.projectlombok:lombok:${lombokVersion}"
-
   api gradleApi()
 
   implementation("org.ow2.asm:asm-commons:${asmVersion}") {

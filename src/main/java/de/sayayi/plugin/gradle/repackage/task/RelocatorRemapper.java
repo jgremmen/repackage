@@ -17,7 +17,6 @@ package de.sayayi.plugin.gradle.repackage.task;
 
 import de.sayayi.plugin.gradle.repackage.relocator.Relocator;
 import de.sayayi.plugin.gradle.repackage.task.RepackageCopyAction.RelativeArchivePath;
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.commons.Remapper;
@@ -25,13 +24,22 @@ import org.objectweb.asm.commons.Remapper;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static org.objectweb.asm.Opcodes.ASM9;
 
-@RequiredArgsConstructor
+
 final class RelocatorRemapper extends Remapper
 {
   private static final Pattern INTERNAL_CLASS_PATTERN = Pattern.compile("(\\[*)?L(.+)");
 
   private final List<Relocator> relocators;
+
+
+  RelocatorRemapper(List<Relocator> relocators)
+  {
+    super(ASM9);
+
+    this.relocators = relocators;
+  }
 
 
   @Contract(pure = true)
@@ -43,9 +51,8 @@ final class RelocatorRemapper extends Remapper
   @Override
   public Object mapValue(Object object)
   {
-    if (object instanceof String)
+    if (object instanceof String name)
     {
-      var name = (String)object;
       var originalValue = name;
       var prefix = "";
 

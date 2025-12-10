@@ -15,7 +15,6 @@
  */
 package de.sayayi.plugin.gradle.repackage.relocator;
 
-import lombok.val;
 import org.codehaus.plexus.util.SelectorUtils;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
@@ -82,10 +81,10 @@ public class DefaultRelocator implements Relocator
 
   private static @NotNull Set<String> normalizePatterns(Collection<String> patterns)
   {
-    val normalized = new LinkedHashSet<String>();
+    final var normalized = new LinkedHashSet<String>();
 
     if (patterns != null && !patterns.isEmpty())
-      for(val pattern: patterns)
+      for(final var pattern: patterns)
       {
         // Regex patterns don't need to be normalized and stay as is
         if (pattern.startsWith(REGEX_HANDLER_PREFIX))
@@ -94,7 +93,7 @@ public class DefaultRelocator implements Relocator
           continue;
         }
 
-        val classPattern = pattern.replace('.', '/');
+        final var classPattern = pattern.replace('.', '/');
 
         normalized.add(classPattern);
 
@@ -148,7 +147,7 @@ public class DefaultRelocator implements Relocator
       path = path.substring(0, path.length() - 6);
     }
 
-    val pathStartsWithPattern = path.charAt(0) == '/'
+    final var pathStartsWithPattern = path.charAt(0) == '/'
         ? path.startsWith(pathPattern, 1)
         : path.startsWith(pathPattern);
 

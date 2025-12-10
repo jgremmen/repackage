@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
  * @author Jeroen Gremmen
  */
 @SuppressWarnings("unused")
-public final class RepackagePlugin implements Plugin<Project>
+public final class RepackagePlugin implements Plugin<@NotNull Project>
 {
   public static final String GRADLE_MIN_VERSION = "8.0";
   public static final String EXTENSION_NAME = "repackage";

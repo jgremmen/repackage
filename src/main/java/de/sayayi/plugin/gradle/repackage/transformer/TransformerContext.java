@@ -16,18 +16,18 @@
 package de.sayayi.plugin.gradle.repackage.transformer;
 
 import de.sayayi.plugin.gradle.repackage.relocator.Relocator;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
 import java.util.List;
 
 
-@RequiredArgsConstructor
-@Getter
-public class TransformerContext
+public record TransformerContext(String path, InputStream inputStream, List<Relocator> relocators)
 {
-  private final String path;
-  private final InputStream inputStream;
-  private final List<Relocator> relocators;
+  public TransformerContext(String path, @NotNull InputStream inputStream, @NotNull List<Relocator> relocators)
+  {
+    this.path = path;
+    this.inputStream = inputStream;
+    this.relocators = relocators;
+  }
 }
