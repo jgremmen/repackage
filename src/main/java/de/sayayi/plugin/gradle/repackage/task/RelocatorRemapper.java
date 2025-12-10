@@ -56,14 +56,14 @@ final class RelocatorRemapper extends Remapper
       var originalValue = name;
       var prefix = "";
 
-      var classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
+      final var classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
       if (classMatcher.matches())
       {
         prefix = classMatcher.group(1) + "L";
         name = classMatcher.group(2);
       }
 
-      for(var relocator: relocators)
+      for(final var relocator: relocators)
       {
         if (relocator.canRelocateClass(name))
           return prefix + relocator.relocateClass(name);
@@ -90,14 +90,14 @@ final class RelocatorRemapper extends Remapper
     var originalValue = name;
     var prefix = "";
 
-    var classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
+    final var classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
     if (classMatcher.matches())
     {
       prefix = classMatcher.group(1) + "L";
       name = classMatcher.group(2);
     }
 
-    for(var relocator: relocators)
+    for(final var relocator: relocators)
       if (relocator.canRelocatePath(name))
         return prefix + relocator.relocatePath(name);
 

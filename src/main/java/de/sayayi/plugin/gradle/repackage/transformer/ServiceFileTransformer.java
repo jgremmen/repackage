@@ -105,7 +105,7 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
   @Contract(pure = true)
   private @NotNull List<String> readLines(@NotNull InputStream inputStream) throws IOException
   {
-    var lines = IOGroovyMethods.readLines(inputStream);
+    final var lines = IOGroovyMethods.readLines(inputStream);
 
     if (stripComments)
     {
@@ -128,7 +128,7 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
   @Contract(pure = true)
   private boolean isCommentOrEmptyLine(@NotNull String line)
   {
-    var trimmedLine = line.trim();
+    final var trimmedLine = line.trim();
     return trimmedLine.isEmpty() || trimmedLine.startsWith("#");
   }
 
@@ -144,10 +144,10 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
   {
     List<String> serviceLines;
 
-    for(var serviceEntry: serviceEntries.entrySet())
+    for(final var serviceEntry: serviceEntries.entrySet())
       if (!(serviceLines = serviceEntry.getValue()).isEmpty())
       {
-        var zipEntry = new ZipEntry(serviceEntry.getKey());
+        final var zipEntry = new ZipEntry(serviceEntry.getKey());
 
         zipOutputStream.putNextEntry(zipEntry);
         zipOutputStream.write(String.join("\n", serviceLines).getBytes(UTF_8));

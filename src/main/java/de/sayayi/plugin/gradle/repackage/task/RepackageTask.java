@@ -63,8 +63,8 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 {
   private final DirectoryProperty destinationDirectory;
   private final ConfigurableFileCollection sourceFiles;
-  private final List<Transformer> transformers = new ArrayList<>();
-  private final List<Relocator> relocators = new ArrayList<>();
+  private final List<@NotNull Transformer> transformers = new ArrayList<>();
+  private final List<@NotNull Relocator> relocators = new ArrayList<>();
   private final PatternSet classFilterPatternSet = new PatternSet();
 
   private final FilterResourceTransformer filterResourceTransformer;

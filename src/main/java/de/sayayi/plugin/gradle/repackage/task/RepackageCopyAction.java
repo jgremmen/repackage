@@ -78,16 +78,17 @@ class RepackageCopyAction implements CopyAction
   private final boolean verbose;
   private final File jarFile;
   private final ZipEntryCompression zipEntryCompression;
-  private final List<Transformer> transformers;
-  private final List<Relocator> relocators;
+  private final List<@NotNull Transformer> transformers;
+  private final List<@NotNull Relocator> relocators;
   private final PatternSet patternSet;
 
   private final Set<String> visitedDirectories = new HashSet<>();
   private final Set<String> visitedFiles = new HashSet<>();
 
 
-  RepackageCopyAction(boolean verbose, File jarFile, ZipEntryCompression zipEntryCompression,
-                      List<Transformer> transformers, @NotNull List<Relocator> relocators, PatternSet patternSet)
+  RepackageCopyAction(boolean verbose, @NotNull File jarFile, @NotNull ZipEntryCompression zipEntryCompression,
+                      @NotNull List<@NotNull Transformer> transformers, @NotNull List<@NotNull Relocator> relocators,
+                      @NotNull PatternSet patternSet)
   {
     this.verbose = verbose;
     this.jarFile = jarFile;
@@ -101,7 +102,7 @@ class RepackageCopyAction implements CopyAction
   @Override
   public @NotNull WorkResult execute(@NotNull CopyActionProcessingStream stream)
   {
-    try(var zipOutputStream = new ZipOutputStream(jarFile)) {
+    try(final var zipOutputStream = new ZipOutputStream(jarFile)) {
       if (zipEntryCompression == ZipEntryCompression.STORED)
         zipOutputStream.setMethod(STORED);
       else if (zipEntryCompression == ZipEntryCompression.DEFLATED)
@@ -123,7 +124,7 @@ class RepackageCopyAction implements CopyAction
 
   private void processTransformers(@NotNull ZipOutputStream zipOutputStream) throws IOException
   {
-    for(var transformer: transformers)
+    for(final var transformer: transformers)
       if (transformer.hasTransformedResource())
         transformer.modifyOutputStream(zipOutputStream);
   }
@@ -170,7 +171,7 @@ class RepackageCopyAction implements CopyAction
     {
       try {
         // Trailing slash in name indicates that entry is a directory
-        var archiveEntry = new ZipEntry(dirDetails.getRelativePath().getPathString() + '/');
+        final var archiveEntry = new ZipEntry(dirDetails.getRelativePath().getPathString() + '/');
 
         archiveEntry.setTime(dirDetails.getLastModified());
         archiveEntry.setUnixMode(DIR_FLAG | dirDetails.getPermissions().toUnixNumeric());
@@ -197,7 +198,7 @@ class RepackageCopyAction implements CopyAction
             transform(fileDetails);
           else
           {
-            var archiveEntry = new ZipEntry(safeMap(fileDetails.getRelativePath().getPathString()));
+            final var archiveEntry = new ZipEntry(safeMap(fileDetails.getRelativePath().getPathString()));
 
             archiveEntry.setTime(fileDetails.getLastModified());
             archiveEntry.setUnixMode(FILE_FLAG | fileDetails.getPermissions().toUnixNumeric());
@@ -217,8 +218,8 @@ class RepackageCopyAction implements CopyAction
 
     private void processArchive(@NotNull FileCopyDetails fileDetails)
     {
-      try(var archive = new ZipFile(fileDetails.getFile())) {
-        var patternSpec = patternSet.getAsSpec();
+      try(final var archive = new ZipFile(fileDetails.getFile())) {
+        final var patternSpec = patternSet.getAsSpec();
 
         StreamUtils
             .enumerationAsStream(archive.getEntries())
@@ -279,9 +280,9 @@ class RepackageCopyAction implements CopyAction
       {
         addParentDirectories(new RelativeArchivePath(new ZipEntry(remapper.mapPath(file) + ".class")));
 
-        var zipEntry = file.entry;
+        final var zipEntry = file.entry;
 
-        try(var classInputStream = archive.getInputStream(zipEntry)) {
+        try(final var classInputStream = archive.getInputStream(zipEntry)) {
           remapClass(classInputStream, file.getPathString(), zipEntry.getTime());
         }
       }
@@ -290,7 +291,7 @@ class RepackageCopyAction implements CopyAction
 
     private void remapClass(@NotNull FileCopyDetails fileCopyDetails) throws IOException
     {
-      try(var classInputStream = newInputStream(fileCopyDetails.getFile().toPath())) {
+      try(final var classInputStream = newInputStream(fileCopyDetails.getFile().toPath())) {
         remapClass(classInputStream, fileCopyDetails.getPath(), fileCopyDetails.getLastModified());
       }
     }
@@ -299,7 +300,7 @@ class RepackageCopyAction implements CopyAction
     private void remapClass(@NotNull InputStream classInputStream, @NotNull String path, long lastModified)
         throws IOException
     {
-      var classWriter = new ClassWriter(0);
+      final var classWriter = new ClassWriter(0);
 
       try {
         new ClassReader(classInputStream).accept(new ClassRemapper(classWriter, remapper), EXPAND_FRAMES);
@@ -307,7 +308,7 @@ class RepackageCopyAction implements CopyAction
         throw new GradleException("Error while remapping class file " + path, ex);
       }
 
-      var archiveEntry = new ZipEntry(mapClassPath(path));
+      final var archiveEntry = new ZipEntry(mapClassPath(path));
 
       archiveEntry.setTime(lastModified);
 
@@ -320,7 +321,7 @@ class RepackageCopyAction implements CopyAction
     @Contract(pure = true)
     private @NotNull String mapClassPath(@NotNull String classPath)
     {
-      var versionsPrefixMatcher = VERSIONS_PREFIX_PATTERN.matcher(classPath);
+      final var versionsPrefixMatcher = VERSIONS_PREFIX_PATTERN.matcher(classPath);
 
       // remapper.mapPath removes the extension, so we'll have to add it again
       return (versionsPrefixMatcher.matches()
@@ -331,15 +332,15 @@ class RepackageCopyAction implements CopyAction
 
     private void copyArchiveEntry(RelativeArchivePath archiveFile, ZipFile archive) throws IOException
     {
-      var entry = new ZipEntry(safeMap(archiveFile.entry.getName()));
+      final var entry = new ZipEntry(safeMap(archiveFile.entry.getName()));
       entry.setTime(archiveFile.entry.getTime());
 
-      var mappedFile = new RelativeArchivePath(entry);
+      final var mappedFile = new RelativeArchivePath(entry);
       addParentDirectories(mappedFile);
 
       jarOutputStream.putNextEntry(mappedFile.entry);
 
-      try(var entryInputStream = archive.getInputStream(archiveFile.entry)) {
+      try(final var entryInputStream = archive.getInputStream(archiveFile.entry)) {
         copyLarge(entryInputStream, jarOutputStream);
       }
 
@@ -349,7 +350,7 @@ class RepackageCopyAction implements CopyAction
 
     private void transform(@NotNull ArchiveFileTreeElement element, @NotNull ZipFile archive) throws IOException
     {
-      try(var archiveEntryInputStream = archive.getInputStream(element.getRelativePath().entry)) {
+      try(final var archiveEntryInputStream = archive.getInputStream(element.getRelativePath().entry)) {
         transformAndClose(element, archiveEntryInputStream);
       }
     }
@@ -357,7 +358,7 @@ class RepackageCopyAction implements CopyAction
 
     private void transform(FileCopyDetails details) throws IOException
     {
-      try(var fileInputStream = newInputStream(details.getFile().toPath())) {
+      try(final var fileInputStream = newInputStream(details.getFile().toPath())) {
         transformAndClose(details, fileInputStream);
       }
     }
@@ -365,7 +366,7 @@ class RepackageCopyAction implements CopyAction
 
     private void transformAndClose(@NotNull FileTreeElement element, @NotNull InputStream inputStream)
     {
-      var mappedPath = remapper.map(element.getRelativePath().getPathString());
+      final var mappedPath = remapper.map(element.getRelativePath().getPathString());
 
       transformers
           .stream()
@@ -384,7 +385,7 @@ class RepackageCopyAction implements CopyAction
     @Contract(pure = true)
     private @NotNull String safeMap(@NotNull String name)
     {
-      var remappedName = remapper.map(name);
+      final var remappedName = remapper.map(name);
       return remappedName != null ? remappedName : name;
     }
   }
@@ -412,8 +413,8 @@ class RepackageCopyAction implements CopyAction
     @Override
     public RelativeArchivePath getParent()
     {
-      var segments = getSegments();
-      var segmentsCount = segments.length;
+      final var segments = getSegments();
+      final var segmentsCount = segments.length;
 
       if (segmentsCount <= 1)
         return null;
