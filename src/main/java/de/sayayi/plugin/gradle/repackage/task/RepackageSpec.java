@@ -37,11 +37,11 @@ import org.jetbrains.annotations.NotNull;
 public interface RepackageSpec
 {
   @Contract(pure = true)
-  @NotNull Property<Boolean> getVerbose();
+  @NotNull Property<@NotNull Boolean> getVerbose();
 
 
   @Contract(pure = true)
-  @NotNull Property<ZipEntryCompression> getEntryCompression();
+  @NotNull Property<@NotNull ZipEntryCompression> getEntryCompression();
 
 
   /**
@@ -89,7 +89,7 @@ public interface RepackageSpec
 
 
   @NotNull RepackageSpec relocate(@NotNull String pattern, String destination,
-                                  Action<DefaultRelocator> configure);
+                                  Action<@NotNull DefaultRelocator> configure);
 
 
   @NotNull RepackageSpec relocate(@NotNull Relocator relocator);
@@ -101,17 +101,18 @@ public interface RepackageSpec
   }
 
 
-  @NotNull <T extends Transformer> RepackageSpec transform(@NotNull Class<T> transformerClass, Action<T> configure)
+  @NotNull <T extends Transformer> RepackageSpec transform(@NotNull Class<T> transformerClass,
+                                                           Action<@NotNull T> configure)
       throws ReflectiveOperationException;
 
 
   @NotNull RepackageSpec transform(@NotNull Transformer transformer);
 
 
-  @NotNull RepackageSpec filterServices(@NotNull Action<ServiceFileTransformer> configure);
+  @NotNull RepackageSpec filterServices(@NotNull Action<@NotNull ServiceFileTransformer> configure);
 
 
-  @NotNull RepackageSpec filterResources(@NotNull Action<PatternFilterable> configure);
+  @NotNull RepackageSpec filterResources(@NotNull Action<@NotNull PatternFilterable> configure);
 
 
   @NotNull RepackageSpec exclude(@NotNull String classnamePattern);
@@ -123,5 +124,5 @@ public interface RepackageSpec
    * @return  destination file name property
    */
   @Contract(pure = true)
-  @NotNull Property<String> getDestinationName();
+  @NotNull Property<@NotNull String> getDestinationName();
 }

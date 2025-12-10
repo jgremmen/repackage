@@ -34,6 +34,7 @@ import org.gradle.api.internal.ConventionTask;
 import org.gradle.api.internal.DocumentationRegistry;
 import org.gradle.api.internal.file.copy.CopyActionExecuter;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
+import org.gradle.api.internal.provider.PropertyFactory;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.*;
@@ -93,6 +94,12 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
 
   @Inject
+  protected PropertyFactory getPropertyFactory() {
+    throw new UnsupportedOperationException();
+  }
+
+
+  @Inject
   protected Instantiator getInstantiator() {
     throw new UnsupportedOperationException();
   }
@@ -118,17 +125,17 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
   @Override
   @Input
-  public abstract @NotNull Property<ZipEntryCompression> getEntryCompression();
+  public abstract @NotNull Property<@NotNull ZipEntryCompression> getEntryCompression();
 
 
   @Override
   @Input
-  public abstract @NotNull Property<String> getDestinationName();
+  public abstract @NotNull Property<@NotNull String> getDestinationName();
 
 
   @Override
   @Input
-  public abstract @NotNull Property<Boolean> getVerbose();
+  public abstract @NotNull Property<@NotNull Boolean> getVerbose();
 
 
   @InputFiles
@@ -200,7 +207,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
   @Override
   public @NotNull RepackageSpec relocate(@NotNull String pattern, String destination,
-                                         Action<DefaultRelocator> configure)
+                                         Action<@NotNull DefaultRelocator> configure)
   {
     addRelocator(new DefaultRelocator(pattern, destination), configure);
     return this;
@@ -215,7 +222,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
   }
 
 
-  private <R extends Relocator> void addRelocator(@NotNull R relocator, Action<R> configure)
+  private <R extends Relocator> void addRelocator(@NotNull R relocator, Action<@NotNull R> configure)
   {
     if (configure != null)
       configure.execute(relocator);
@@ -232,7 +239,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
   @Override
   public @NotNull <T extends Transformer> RepackageSpec transform(@NotNull Class<T> transformerClass,
-                                                                  Action<T> configure)
+                                                                  Action<@NotNull T> configure)
       throws ReflectiveOperationException
   {
     addTransform(transformerClass.getDeclaredConstructor().newInstance(), configure);
@@ -248,7 +255,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
   }
 
 
-  private <T extends Transformer> void addTransform(@NotNull T transformer, Action<T> configure)
+  private <T extends Transformer> void addTransform(@NotNull T transformer, Action<@NotNull T> configure)
   {
     if (configure != null)
       configure.execute(transformer);
@@ -264,7 +271,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
 
   @Override
-  public @NotNull RepackageSpec filterServices(@NotNull Action<ServiceFileTransformer> configure)
+  public @NotNull RepackageSpec filterServices(@NotNull Action<@NotNull ServiceFileTransformer> configure)
   {
     configure.execute(serviceFileTransformer);
     return this;
@@ -272,7 +279,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
 
   @Override
-  public @NotNull RepackageSpec filterResources(@NotNull Action<PatternFilterable> configure)
+  public @NotNull RepackageSpec filterResources(@NotNull Action<@NotNull PatternFilterable> configure)
   {
     configure.execute(filterResourceTransformer.getFilter());
     return this;
@@ -311,7 +318,7 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
     rootSpec.setDuplicatesStrategy(EXCLUDE);
     rootSpec.from(sourceFiles);
 
-    var copyActionExecuter = new CopyActionExecuter(getInstantiator(), objectFactory, getFileSystem(),
+    var copyActionExecuter = new CopyActionExecuter(getInstantiator(), getPropertyFactory(), getFileSystem(),
         true, getDocumentationRegistry());
     var copyAction = new RepackageCopyAction(verbose, repackagedJarFile, getEntryCompression().get(),
         transformers, relocators, classFilterPatternSet);

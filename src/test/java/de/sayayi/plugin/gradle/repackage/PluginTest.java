@@ -103,7 +103,7 @@ class PluginTest
         .withProjectDir(testProjectDir.toFile())
         .withArguments("assemble", "--stacktrace", "--info", "--configuration-cache")
         .withPluginClasspath()
-        .withGradleVersion("8.9")
+        .withGradleVersion("9.2.1")
         .withDebug(true)
         .forwardOutput()
         .build();
