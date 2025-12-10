@@ -16,6 +16,7 @@
 package de.sayayi.plugin.gradle.repackage;
 
 import org.gradle.testkit.runner.GradleRunner;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,53 +48,68 @@ class PluginTest
   @BeforeEach
   void prepareProject() throws IOException
   {
-    write(testProjectDir.resolve("settings.gradle"),
-        List.of("rootProject.name = 'test-repackage'"));
+    write(testProjectDir.resolve("settings.gradle"), asList("""
+        rootProject.name = 'test-repackage'
+        """));
 
-    write(testProjectDir.resolve("gradle.properties"),
-        List.of(""));
+    write(testProjectDir.resolve("gradle.properties"), asList("""
+        """));
 
-    write(testProjectDir.resolve("build.gradle"), List.of(
-        "plugins {",
-        "  id 'java'",
-        "  id 'de.sayayi.plugin.gradle.repackage'",
-        "}",
-        "repositories {",
-        "  mavenCentral()",
-        "}",
-        "repackage {",
-        "  destinationDir = project.layout.buildDirectory.dir('repack')",
-        "  verbose = true",
-        "}",
-        "dependencies {",
-        "  implementation repackage.dependency('sayayi-lib-bundle') {",
-        "    from 'de.sayayi.lib:message-format:0.10.0'",
-        "    from('de.sayayi.lib:message-format-spring:0.10.0') {",
-        "      transitive = false",
-        "    }",
-        "    from('de.sayayi.lib:message-format-jodatime:0.10.0') {",
-        "      exclude group: 'joda-time'",
-        "    }",
-        "    from 'de.sayayi.lib:protocol-core:1.4.0'",
-        "    from 'de.sayayi.lib:protocol-message-matcher:1.4.0'",
-        "    relocate 'org.antlr.v4', 'de.sayayi.lib.antlr4'",
-        "    filterServices {",
-        "      stripComments = true",
-        "    }",
-        "    filterResources {",
-        "      exclude 'META-INF/maven/**'",
-        "    }",
-        "    exclude 'org.antlr.v4.runtime.tree.xpath.**'",
-        "    exclude 'de.sayayi.lib.message.adopter.AsmAnnotation*'",
-        "  }",
-        "}"
-    ));
+    write(testProjectDir.resolve("build.gradle"), asList("""
+        plugins {
+          id 'java'
+          id 'de.sayayi.plugin.gradle.repackage'
+        }
+        
+        repositories {
+          mavenCentral()
+        }
+        
+        repackage {
+          destinationDir = project.layout.buildDirectory.dir('repack')
+          verbose = true
+        }
+        
+        dependencies {
+          implementation repackage.dependency('sayayi-lib-bundle') {
+            from 'de.sayayi.lib:message-format:0.10.0'
+        
+            from('de.sayayi.lib:message-format-spring:0.10.0') {
+              transitive = false
+            }
+        
+            from('de.sayayi.lib:message-format-jodatime:0.10.0') {
+              exclude group: 'joda-time'
+            }
+        
+            from 'de.sayayi.lib:protocol-core:1.4.0'
+            from 'de.sayayi.lib:protocol-message-matcher:1.4.0'
+        
+            relocate 'org.antlr.v4', 'de.sayayi.lib.antlr4'
+        
+            filterServices {
+              stripComments = true
+            }
+        
+            filterResources {
+              exclude 'META-INF/maven/**'
+            }
+        
+            exclude 'org.antlr.v4.runtime.tree.xpath.**'
+            exclude 'de.sayayi.lib.message.adopter.AsmAnnotation*'
+          }
+        }"""));
 
     buildDir = testProjectDir.resolve("build");
     javaDir = testProjectDir.resolve("src/main/java");
     testPackageDir = javaDir.resolve("test");
 
     createDirectories(testPackageDir);
+  }
+
+
+  private @NotNull List<String> asList(@NotNull String string) {
+    return List.of(string.split("\n"));
   }
 
 
