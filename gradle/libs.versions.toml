@@ -1,0 +1,27 @@
+[versions]
+# Libraries
+asm = "[9.9,10.0)"
+ant = "1.10.15"
+commons-compress = "1.28.0"
+plexus-utils = "4.0.2"
+junit = "6.0.+"
+
+# Plugins
+plugin-publish = "2.0.0"
+
+[libraries]
+# Implementation dependencies
+asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
+ant = { module = "org.apache.ant:ant", version.ref = "ant" }
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
+plexus-utils = { module = "org.codehaus.plexus:plexus-utils", version.ref = "plexus-utils" }
+
+# Test dependencies
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
+[plugins]
+plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish" }
+
