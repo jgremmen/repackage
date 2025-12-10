@@ -41,7 +41,7 @@ repositories {
 
 
 def asmVersion = '[9.0,10.0)'
-def junitVersion = '5.11.+'
+def junitVersion = '5.12.+'
 def lombokVersion = '1.18.+'
 
 
