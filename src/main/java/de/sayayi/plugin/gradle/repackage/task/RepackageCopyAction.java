@@ -21,7 +21,6 @@ import de.sayayi.plugin.gradle.repackage.transformer.TransformerContext;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tools.ant.util.StreamUtils;
 import org.apache.tools.zip.ZipEntry;
@@ -93,7 +92,7 @@ class RepackageCopyAction implements CopyAction
   @Override
   public @NotNull WorkResult execute(@NotNull CopyActionProcessingStream stream)
   {
-    try(val zipOutputStream = new ZipOutputStream(jarFile)) {
+    try(var zipOutputStream = new ZipOutputStream(jarFile)) {
       if (zipEntryCompression == ZipEntryCompression.STORED)
         zipOutputStream.setMethod(STORED);
       else if (zipEntryCompression == ZipEntryCompression.DEFLATED)
@@ -115,7 +114,7 @@ class RepackageCopyAction implements CopyAction
 
   private void processTransformers(@NotNull ZipOutputStream zipOutputStream) throws IOException
   {
-    for(val transformer: transformers)
+    for(var transformer: transformers)
       if (transformer.hasTransformedResource())
         transformer.modifyOutputStream(zipOutputStream);
   }
@@ -162,7 +161,7 @@ class RepackageCopyAction implements CopyAction
     {
       try {
         // Trailing slash in name indicates that entry is a directory
-        val archiveEntry = new ZipEntry(dirDetails.getRelativePath().getPathString() + '/');
+        var archiveEntry = new ZipEntry(dirDetails.getRelativePath().getPathString() + '/');
 
         archiveEntry.setTime(dirDetails.getLastModified());
         archiveEntry.setUnixMode(DIR_FLAG | dirDetails.getPermissions().toUnixNumeric());
@@ -189,7 +188,7 @@ class RepackageCopyAction implements CopyAction
             transform(fileDetails);
           else
           {
-            val archiveEntry = new ZipEntry(safeMap(fileDetails.getRelativePath().getPathString()));
+            var archiveEntry = new ZipEntry(safeMap(fileDetails.getRelativePath().getPathString()));
 
             archiveEntry.setTime(fileDetails.getLastModified());
             archiveEntry.setUnixMode(FILE_FLAG | fileDetails.getPermissions().toUnixNumeric());
@@ -210,8 +209,8 @@ class RepackageCopyAction implements CopyAction
     @SneakyThrows(IOException.class)
     private void processArchive(@NotNull FileCopyDetails fileDetails)
     {
-      try(val archive = new ZipFile(fileDetails.getFile())) {
-        val patternSpec = patternSet.getAsSpec();
+      try(var archive = new ZipFile(fileDetails.getFile())) {
+        var patternSpec = patternSet.getAsSpec();
 
         StreamUtils
             .enumerationAsStream(archive.getEntries())
@@ -229,7 +228,7 @@ class RepackageCopyAction implements CopyAction
     {
       if (archiveFile.isClassFile() || !isTransformable(archiveFile))
       {
-        val archiveFilePath = archiveFile.getRelativePath();
+        var archiveFilePath = archiveFile.getRelativePath();
 
         if (visitedFiles.add(archiveFilePath.getPathString()))
         {
@@ -267,9 +266,9 @@ class RepackageCopyAction implements CopyAction
       {
         addParentDirectories(new RelativeArchivePath(new ZipEntry(remapper.mapPath(file) + ".class")));
 
-        val zipEntry = file.entry;
+        var zipEntry = file.entry;
 
-        try(val classInputStream = archive.getInputStream(zipEntry)) {
+        try(var classInputStream = archive.getInputStream(zipEntry)) {
           remapClass(classInputStream, file.getPathString(), zipEntry.getTime());
         }
       }
@@ -278,7 +277,7 @@ class RepackageCopyAction implements CopyAction
 
     private void remapClass(@NotNull FileCopyDetails fileCopyDetails) throws IOException
     {
-      try(val classInputStream = newInputStream(fileCopyDetails.getFile().toPath())) {
+      try(var classInputStream = newInputStream(fileCopyDetails.getFile().toPath())) {
         remapClass(classInputStream, fileCopyDetails.getPath(), fileCopyDetails.getLastModified());
       }
     }
@@ -287,7 +286,7 @@ class RepackageCopyAction implements CopyAction
     private void remapClass(@NotNull InputStream classInputStream, @NotNull String path, long lastModified)
         throws IOException
     {
-      val classWriter = new ClassWriter(0);
+      var classWriter = new ClassWriter(0);
 
       try {
         new ClassReader(classInputStream).accept(new ClassRemapper(classWriter, remapper), EXPAND_FRAMES);
@@ -295,7 +294,7 @@ class RepackageCopyAction implements CopyAction
         throw new GradleException("Error while remapping class file " + path, ex);
       }
 
-      val archiveEntry = new ZipEntry(mapClassPath(path));
+      var archiveEntry = new ZipEntry(mapClassPath(path));
 
       archiveEntry.setTime(lastModified);
 
@@ -308,7 +307,7 @@ class RepackageCopyAction implements CopyAction
     @Contract(pure = true)
     private @NotNull String mapClassPath(@NotNull String classPath)
     {
-      val versionsPrefixMatcher = VERSIONS_PREFIX_PATTERN.matcher(classPath);
+      var versionsPrefixMatcher = VERSIONS_PREFIX_PATTERN.matcher(classPath);
 
       // remapper.mapPath removes the extension, so we'll have to add it again
       return (versionsPrefixMatcher.matches()
@@ -319,15 +318,15 @@ class RepackageCopyAction implements CopyAction
 
     private void copyArchiveEntry(RelativeArchivePath archiveFile, ZipFile archive) throws IOException
     {
-      val entry = new ZipEntry(safeMap(archiveFile.entry.getName()));
+      var entry = new ZipEntry(safeMap(archiveFile.entry.getName()));
       entry.setTime(archiveFile.entry.getTime());
 
-      val mappedFile = new RelativeArchivePath(entry);
+      var mappedFile = new RelativeArchivePath(entry);
       addParentDirectories(mappedFile);
 
       jarOutputStream.putNextEntry(mappedFile.entry);
 
-      try(val entryInputStream = archive.getInputStream(archiveFile.entry)) {
+      try(var entryInputStream = archive.getInputStream(archiveFile.entry)) {
         copyLarge(entryInputStream, jarOutputStream);
       }
 
@@ -337,7 +336,7 @@ class RepackageCopyAction implements CopyAction
 
     private void transform(@NotNull ArchiveFileTreeElement element, @NotNull ZipFile archive) throws IOException
     {
-      try(val archiveEntryInputStream = archive.getInputStream(element.getRelativePath().entry)) {
+      try(var archiveEntryInputStream = archive.getInputStream(element.getRelativePath().entry)) {
         transformAndClose(element, archiveEntryInputStream);
       }
     }
@@ -345,7 +344,7 @@ class RepackageCopyAction implements CopyAction
 
     private void transform(FileCopyDetails details) throws IOException
     {
-      try(val fileInputStream = newInputStream(details.getFile().toPath())) {
+      try(var fileInputStream = newInputStream(details.getFile().toPath())) {
         transformAndClose(details, fileInputStream);
       }
     }
@@ -353,7 +352,7 @@ class RepackageCopyAction implements CopyAction
 
     private void transformAndClose(@NotNull FileTreeElement element, @NotNull InputStream inputStream)
     {
-      val mappedPath = remapper.map(element.getRelativePath().getPathString());
+      var mappedPath = remapper.map(element.getRelativePath().getPathString());
 
       transformers
           .stream()
@@ -372,7 +371,7 @@ class RepackageCopyAction implements CopyAction
     @Contract(pure = true)
     private @NotNull String safeMap(@NotNull String name)
     {
-      val remappedName = remapper.map(name);
+      var remappedName = remapper.map(name);
       return remappedName != null ? remappedName : name;
     }
   }
@@ -401,8 +400,8 @@ class RepackageCopyAction implements CopyAction
     @SuppressWarnings("NullableProblems")
     public RelativeArchivePath getParent()
     {
-      val segments = getSegments();
-      val segmentsCount = segments.length;
+      var segments = getSegments();
+      var segmentsCount = segments.length;
 
       if (segmentsCount <= 1)
         return null;

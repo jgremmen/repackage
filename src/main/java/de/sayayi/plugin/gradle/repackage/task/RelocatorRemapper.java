@@ -18,7 +18,6 @@ package de.sayayi.plugin.gradle.repackage.task;
 import de.sayayi.plugin.gradle.repackage.relocator.Relocator;
 import de.sayayi.plugin.gradle.repackage.task.RepackageCopyAction.RelativeArchivePath;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.commons.Remapper;
@@ -47,17 +46,17 @@ final class RelocatorRemapper extends Remapper
     if (object instanceof String)
     {
       var name = (String)object;
-      val originalValue = name;
+      var originalValue = name;
       var prefix = "";
 
-      val classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
+      var classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
       if (classMatcher.matches())
       {
         prefix = classMatcher.group(1) + "L";
         name = classMatcher.group(2);
       }
 
-      for(val relocator: relocators)
+      for(var relocator: relocators)
       {
         if (relocator.canRelocateClass(name))
           return prefix + relocator.relocateClass(name);
@@ -81,17 +80,17 @@ final class RelocatorRemapper extends Remapper
         name.startsWith("jdk/"))
       return null;
 
-    val originalValue = name;
+    var originalValue = name;
     var prefix = "";
 
-    val classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
+    var classMatcher = INTERNAL_CLASS_PATTERN.matcher(name);
     if (classMatcher.matches())
     {
       prefix = classMatcher.group(1) + "L";
       name = classMatcher.group(2);
     }
 
-    for(val relocator: relocators)
+    for(var relocator: relocators)
       if (relocator.canRelocatePath(name))
         return prefix + relocator.relocatePath(name);
 

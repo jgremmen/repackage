@@ -17,7 +17,6 @@ package de.sayayi.plugin.gradle.repackage.transformer;
 
 import groovy.lang.Closure;
 import lombok.SneakyThrows;
-import lombok.val;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 import org.codehaus.groovy.runtime.IOGroovyMethods;
@@ -69,11 +68,11 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
   @SneakyThrows(IOException.class)
   public void transform(@NotNull TransformerContext context)
   {
-    val lines = readLines(context.getInputStream());
+    var lines = readLines(context.getInputStream());
     var targetPath = context.getPath();
     String line, comment;
 
-    for(val relocator: context.getRelocators())
+    for(var relocator: context.getRelocators())
     {
       if (relocator.canRelocateClass(new File(targetPath).getName()))
         targetPath = relocator.relocateClass(targetPath);
@@ -103,14 +102,14 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
   @Contract(pure = true)
   private @NotNull List<String> readLines(@NotNull InputStream inputStream) throws IOException
   {
-    val lines = IOGroovyMethods.readLines(inputStream);
+    var lines = IOGroovyMethods.readLines(inputStream);
 
     if (stripComments)
     {
       for(int n = 0; n < lines.size(); n++)
       {
-        val line = lines.get(n);
-        val hashIndex = line.indexOf('#');
+        var line = lines.get(n);
+        var hashIndex = line.indexOf('#');
 
         if (hashIndex > 0)
           lines.set(n, line.substring(0, hashIndex).trim());
@@ -126,7 +125,7 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
   @Contract(pure = true)
   private boolean isCommentOrEmptyLine(@NotNull String line)
   {
-    val trimmedLine = line.trim();
+    var trimmedLine = line.trim();
     return trimmedLine.isEmpty() || trimmedLine.startsWith("#");
   }
 
@@ -142,10 +141,10 @@ public final class ServiceFileTransformer implements Transformer, PatternFiltera
   {
     List<String> serviceLines;
 
-    for(val serviceEntry: serviceEntries.entrySet())
+    for(var serviceEntry: serviceEntries.entrySet())
       if (!(serviceLines = serviceEntry.getValue()).isEmpty())
       {
-        val zipEntry = new ZipEntry(serviceEntry.getKey());
+        var zipEntry = new ZipEntry(serviceEntry.getKey());
 
         zipOutputStream.putNextEntry(zipEntry);
         zipOutputStream.write(String.join("\n", serviceLines).getBytes(UTF_8));

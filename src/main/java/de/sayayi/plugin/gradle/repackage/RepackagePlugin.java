@@ -15,7 +15,6 @@
  */
 package de.sayayi.plugin.gradle.repackage;
 
-import lombok.val;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -39,7 +38,7 @@ public final class RepackagePlugin implements Plugin<Project>
     if (GradleVersion.current().compareTo(GradleVersion.version(GRADLE_MIN_VERSION)) < 0)
       throw new GradleException("Repackage requires at least Gradle " + GRADLE_MIN_VERSION);
 
-    val repackageExtension = project
+    var repackageExtension = project
         .getExtensions()
         .create(EXTENSION_NAME, RepackageExtension.class, project);
 

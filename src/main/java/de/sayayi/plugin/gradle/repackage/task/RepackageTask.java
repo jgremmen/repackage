@@ -22,7 +22,6 @@ import de.sayayi.plugin.gradle.repackage.transformer.FilterResourceTransformer;
 import de.sayayi.plugin.gradle.repackage.transformer.ServiceFileTransformer;
 import de.sayayi.plugin.gradle.repackage.transformer.Transformer;
 import groovy.lang.Closure;
-import lombok.val;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
@@ -73,8 +72,8 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
 
   public RepackageTask()
   {
-    val project = getProject();
-    val repackageExtension = project.getExtensions().getByType(RepackageExtension.class);
+    var project = getProject();
+    var repackageExtension = project.getExtensions().getByType(RepackageExtension.class);
 
     sourceFiles = project.files();
     destinationDirectory = repackageExtension.getDestinationDir();
@@ -295,25 +294,26 @@ public abstract class RepackageTask extends ConventionTask implements RepackageS
   @TaskAction
   public void run()
   {
-    val repackagedJarFile = getDestinationPath().getAsFile();
+    var repackagedJarFile = getDestinationPath().getAsFile();
+    var verbose = getVerbose().get();
 
     //noinspection ResultOfMethodCallIgnored
     repackagedJarFile.getParentFile().mkdirs();
 
-    if (getVerbose().get())
+    if (verbose)
       getLogger().info("Repackage to: {}", repackagedJarFile);
 
-    val objectFactory = getObjectFactory();
-    val rootSpec = objectFactory.newInstance(DefaultCopySpec.class);
+    var objectFactory = getObjectFactory();
+    var rootSpec = objectFactory.newInstance(DefaultCopySpec.class);
 
     rootSpec.setCaseSensitive(true);
     rootSpec.setIncludeEmptyDirs(false);
     rootSpec.setDuplicatesStrategy(EXCLUDE);
     rootSpec.from(sourceFiles);
 
-    val copyActionExecuter = new CopyActionExecuter(getInstantiator(), objectFactory, getFileSystem(),
+    var copyActionExecuter = new CopyActionExecuter(getInstantiator(), objectFactory, getFileSystem(),
         true, getDocumentationRegistry());
-    val copyAction = new RepackageCopyAction(getVerbose().get(), repackagedJarFile, getEntryCompression().get(),
+    var copyAction = new RepackageCopyAction(verbose, repackagedJarFile, getEntryCompression().get(),
         transformers, relocators, classFilterPatternSet);
 
     setDidWork(copyActionExecuter

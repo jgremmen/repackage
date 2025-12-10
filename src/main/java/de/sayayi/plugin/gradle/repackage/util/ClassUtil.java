@@ -15,7 +15,6 @@
  */
 package de.sayayi.plugin.gradle.repackage.util;
 
-import lombok.val;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +41,7 @@ public class ClassUtil
   @Contract(pure = true)
   public static boolean isFullyQualifiedClassname(@NotNull String className)
   {
-    for(val part: className.split("\\.",-1))
+    for(var part: className.split("\\.",-1))
     {
       if (KEYWORDS.contains(part) || part.isEmpty() || !isJavaIdentifierStart(part.charAt(0)))
         return false;
@@ -68,8 +67,8 @@ public class ClassUtil
   @Contract(pure = true)
   public static @NotNull Pattern createClassnamePatternPathRegex(@NotNull String classnamePattern)
   {
-    val regex = new StringBuilder("\\A");
-    val patternChars = classnamePattern.toCharArray();
+    var regex = new StringBuilder("\\A");
+    var patternChars = classnamePattern.toCharArray();
 
     for(int n = 0, l = patternChars.length; n < l; n++)
     {
