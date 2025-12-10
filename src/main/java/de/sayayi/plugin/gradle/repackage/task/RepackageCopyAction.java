@@ -397,7 +397,6 @@ class RepackageCopyAction implements CopyAction
 
 
     @Override
-    @SuppressWarnings("NullableProblems")
     public RelativeArchivePath getParent()
     {
       var segments = getSegments();
@@ -489,14 +488,8 @@ class RepackageCopyAction implements CopyAction
 
 
     @Override
-    public int getMode() {
-      return archivePath.entry.getUnixMode();
-    }
-
-
-    @Override
     public @NotNull FilePermissions getPermissions() {
-      return new DefaultFilePermissions(getMode());
+      return new DefaultFilePermissions(archivePath.entry.getUnixMode());
     }
 
 
