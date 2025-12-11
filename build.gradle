@@ -16,13 +16,14 @@
 
 plugins {
   id 'java-gradle-plugin'
-  id 'maven-publish'
-  id 'signing'
   alias(libs.plugins.plugin.publish)
 }
 
 
 layout.buildDirectory = '.build'
+
+
+apply plugin: 'org.danilopianini.publish-on-central'
 
 
 description = 'Repackage Gradle Plugin'
@@ -109,6 +110,9 @@ test {
 }
 
 
+jar.dependsOn test
+
+
 gradlePlugin {
   website = 'https://github.com/jgremmen/repackage'
   vcsUrl = 'https://github.com/jgremmen/repackage'
@@ -126,76 +130,52 @@ gradlePlugin {
 
 
 def snapshot = version.toString().endsWith('-SNAPSHOT')
-def tmpRepositoryDirectory = rootProject.layout.buildDirectory
-    .dir('repository').get()
-    .dir(snapshot ? 'snapshot' : 'release')
-    .asFile
+
+if (snapshot)
+{
+  publishing {
+    repositories {
+      maven {
+        name = 'mavenCentralSnapshot'
+        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+
+        mavenContent {
+          snapshotsOnly()
+        }
+
+        credentials {
+          username = rootProject.findProperty('mavenCentralPortalUsername')
+          password = rootProject.findProperty('mavenCentralPortalPassword')
+        }
+      }
+    }
+  }
+}
+
+
+publishOnCentral {
+  repoOwner = 'jgremmen'
+
+  projectLongName = project.description
+  projectDescription = 'Repackage classes and java libraries.'
+
+  licenseName = 'Apache License, Version 2.0'
+  licenseUrl = 'https://www.apache.org/licenses/LICENSE-2.0'
+}
+
 
 publishing {
-  repositories {
-    maven {
-      name = 'mavenTemp'
-      url = tmpRepositoryDirectory
-    }
-
-    maven {
-      name = "jfrogArtifactory"
-      url = snapshot
-          ? "https://artifactory.sayayi.de/artifactory/plugins-snapshot/"
-          : "https://artifactory.sayayi.de/artifactory/plugins-release/"
-
-      credentials {
-        username = findProperty('artifactory.username')
-        password = findProperty('artifactory.password')
-      }
-      authentication {
-        digest(DigestAuthentication)
-      }
-    }
-
-    maven {
-      name = 'mavenCentral'
-      url = snapshot
-          ? 'https://oss.sonatype.org/content/repositories/snapshots'
-          : 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-
-      credentials {
-        username = findProperty('mavenCentral.username')
-        password = findProperty('mavenCentral.password')
-      }
-    }
-  }
-
   publications {
-    gradlePlugin(MavenPublication) {
-      from components.java
-
-      pom { MavenPom pom ->
-        pom.name = 'Repackage Gradle Plugin'
-        pom.description = 'Repackage classes and java libraries.'
-        pom.url = 'https://github.com/jgremmen/repackage'
-        pom.inceptionYear = '2024'
-
-        licenses {
-          license { MavenPomLicense lic ->
-            lic.name = 'Apache License, Version 2.0'
-            lic.url = 'https://www.apache.org/licenses/LICENSE-2.0'
-            lic.distribution = 'repo'
-          }
-        }
+    withType(MavenPublication).configureEach {
+      pom {
+        inceptionYear = '2024'
 
         developers {
-          developer { MavenPomDeveloper dev ->
-            dev.id = 'jgremmen'
-            dev.name = 'Jeroen Gremmen'
-            dev.email = 'jeroen.gremmen@sayayi.de'
+          developer {
+            id = 'jgremmen'
+            name = 'Jeroen Gremmen'
+            email = 'jeroen.gremmen@sayayi.de'
           }
-        }
-
-        scm { MavenPomScm scm ->
-          scm.connection = 'scm:git:git://github.com/jgremmen/repackage.git'
-          scm.developerConnection = 'scm:git:git://github.com/jgremmen/repackage.git'
-          scm.url = 'https://github.com/jgremmen/repackage'
         }
       }
     }
@@ -203,20 +183,23 @@ publishing {
 }
 
 
-signing {
-  sign publishing.publications.gradlePlugin
+tasks.register('publishToProjectLocalRepository') {
+  group = PublishingPlugin.PUBLISH_TASK_GROUP
+  description = 'Create a local repository with releasable artifacts.'
+
+  dependsOn publishOSSRHPublicationToProjectLocalRepository
+
+  outputs.dir layout.buildDirectory.dir('project-local-repository')
 }
 
 
-publishGradlePluginPublicationToMavenTempRepository.configure {
-  dependsOn 'test'
-  dependsOn 'signPluginMavenPublication'
+zipMavenCentralPortalPublication.configure {
+  dependsOn 'publishOSSRHPublicationToProjectLocalRepository'
 }
 
 
-publishGradlePluginPublicationToMavenCentralRepository.configure {
-  dependsOn 'test'
-  dependsOn 'signPluginMavenPublication'
+tasks.named('zipMavenCentralPortalPublication') {
+  mustRunAfter 'publishToProjectLocalRepository'
 }
 
 
@@ -225,19 +208,26 @@ publishPlugins.configure {
 }
 
 
-tasks.register('releaseAll') {
+tasks.register('releaseArtifacts') {
+  description = "Release ${version} artifacts to Maven Central Repository."
   group = 'release'
-  description = 'Release all publications to Maven and Gradle Plugin repository.'
 
-  dependsOn 'publishGradlePluginPublicationToMavenCentralRepository'
-  dependsOn 'publishPlugins'
+  inputs.property('version', version)
+  inputs.property('snapshot', snapshot)
+
+  dependsOn 'publishToProjectLocalRepository'
+
+  if (snapshot)
+    dependsOn 'publishOSSRHPublicationToMavenCentralSnapshotRepository'
+  else
+  {
+    dependsOn 'zipMavenCentralPortalPublication'
+    dependsOn 'validateMavenCentralPortalPublication'
+    dependsOn 'releaseMavenCentralPortalPublication'
+  }
 }
 
 
-tasks.register('releaseAllTemp') {
-  group = 'release'
-  description = 'Release all publications to temporary Maven repository.'
-
-  dependsOn 'publishGradlePluginPublicationToMavenTempRepository'
-  dependsOn 'publishRepackagePluginMarkerMavenPublicationToMavenTempRepository'
+clean {
+  delete layout.projectDirectory.dir('build')
 }
