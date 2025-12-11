@@ -1,4 +1,6 @@
 [versions]
+repackage-gradle-plugin = "0.3.1-SNAPSHOT"
+
 # Libraries
 asm = "[9.9,10.0)"
 ant = "1.10.15"
@@ -24,4 +26,3 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 
 [plugins]
 plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "plugin-publish" }
-

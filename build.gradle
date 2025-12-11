@@ -28,7 +28,7 @@ apply plugin: 'org.danilopianini.publish-on-central'
 
 description = 'Repackage Gradle Plugin'
 group = 'de.sayayi.plugin.gradle'
-version = '0.3.1-SNAPSHOT'
+version = libs.versions.repackage.gradle.plugin.get()
 
 
 java {
